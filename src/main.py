@@ -1,6 +1,5 @@
 # %%
 import pandas as pd
-import os
 import glob
 import matplotlib.pyplot as plt
 
@@ -17,14 +16,23 @@ P_rtdr = 'C:\\Users\\Students\\Box\\Research' \
 P_sensor_num = 6
 
 Almond_coef = SAP_SENSOR_COEFFICIENTS = [
-    {"a": 1, "b": 1}, #Sensor 1
-    {"a": 1, "b": 1}, #Sensor 2
-    {"a": 1, "b": 1}, #Sensor 3
-    {"a": 1, "b": 1}, #Sensor 4
-    {"a": 1, "b": 1}, #Sensor 5
-    {"a": 1, "b": 1} #Sensor 6
+    {"w": 2075.845, "d": 4338.209}, #Sensor 1
+    {"w": 2103.918919, "d": 4160.990991}, #Sensor 2
+    {"w": 2001.648649, "d": 3736.900901}, #Sensor 3
+    {"w": 2067.945455, "d": 3904.409091}, #Sensor 4
+    {"w": 1959.855856, "d": 3713.747748}, #Sensor 5
+    {"w": 2102.873874, "d": 3964.081081} #Sensor 6
 ]
 
+# Almond_test_dates = [
+#     {"T1": },
+#     {"T2": }, 
+#     {"T3": }, 
+#     {"T4": },
+#     {"T5": }, 
+#     {"T6": }, 
+#     {"T7": }
+# ]
 
 ######## Class #########
 
@@ -49,8 +57,11 @@ class file_handle:
         newsap = self.file_mixer_sap()
         for i in range(self.num):
             id = 'TREW ' + str(i+1)
-            temp = newsap[newsap["Sensor ID"] == id]
+            print(i+1)
 
+            temp = newsap[newsap["Sensor ID"] == id]
+            print(newsap[newsap["Sensor ID"] == id])
+            
             V1 = (temp['Value 1'])
             dT = (V1 - 1000)/20
             dTmin = min(dT)
@@ -60,11 +71,16 @@ class file_handle:
             
             
             V2 = (temp['Value 2'])
-            
+            w = self.coef[i]['w']
+            d = self.coef[i]['d']
+            mois = (1-(V2-w)/(d-w))*100
 
             temp['Value 1'] = nu
-            temp['Value 2'] = 
+            temp['Value 2'] = mois
 
+            newsap[newsap["Sensor ID"] == id] = temp
+            print(newsap[newsap["Sensor ID"] == id])
+        # print(newsap)
         return newsap
 
     
@@ -83,7 +99,9 @@ class file_handle:
 
     #     return sap_data,weather_data
 
-
+Almond = file_handle(A_rtdr,A_sensor_num)
+sap_data = Almond.sap_correct()
+weather_data = Almond.file_mixer_weather()
 
 #### Calling Class ####
 
@@ -98,30 +116,32 @@ class file_handle:
 
 
 # %%
-Almond = file_handle(A_rtdr,A_sensor_num)
-sap_data = Almond.sap_correct()
-weather_data = Almond.file_mixer_weather()
+
 
 #####################
 # ax = plt()
 
-newsap = sap_data[(sap_data["Sensor ID"] == 'TREW 6')]
+newsap = sap_data[(sap_data["Sensor ID"] == 'TREW 6') & sap_data["Date and Time"] == '2022-08-27 00:00:00']
 # newsap = sap_data[(sap_data["Sensor ID"] == 'TREW 6') & (sap_data["Value 2"]<2500)]
 # newsap = newsap[1000:2000]
 # newwed = weather_data[1000:2000]
 # newsap['Value 1'] = (newsap['Value 1']-newsap['Value 1'].min())*300/newsap['Value 1'].max()
 
-newsap.plot(kind = 'scatter',
-        x = 'Date and Time',
-        y = 'Value 1',
-        color = 'blue')
+# newsap.plot(kind = 'scatter',
+#         x = 'Date and Time',
+#         y = 'Value 1',
+#         color = 'blue')
+
+newsap.plot(x = 'Date and Time',
+        y = 'Value 2',
+        color = 'red')        
 
 # newwed.plot(kind = 'scatter',
 #         x = 'Date and Time',
 #         y = 'Temperature [℃]',
 #         color = 'red')
 
-plt.title('Sap Flow')
+# plt.title('Sap Flow')
 # plt.autoscale(enable=True, axis='y', tight=True)
 plt.show()
 
