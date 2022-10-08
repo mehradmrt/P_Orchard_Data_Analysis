@@ -10,41 +10,46 @@ import skimage.io as io
 
 # from Image_extract_test import Json_root
 
-Json_root = 'C:/Users/Students/Downloads/Test_Sensor_trees/images/instances_default_neww.json'
-# img_root = 'C:/Users/Students/Downloads/Test_Sensor_trees/images'
-# img_root_idx = 'C:/Users/Students/Downloads/Test_Sensor_trees/images/NDVI_idx.tif'
-
-# Json_root = ''
-
-img_root = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress' \
-    + '/Data Collection/Pistachio/Multispectral/'
-
 Dict = {'T1': '06_07_22', 'T2': '06_21_22', 'T3': '07_05_22', 'T4': '07_13_22', \
             'T5': '07_26_22', 'T6': '08_02_22', 'T7': '08_12_22'}
 
-extn = '/index_map'
+def json_enumerator(idx_file, idx_type):
 
-TRAIN_IMAGES_DIRECTORY = img_root
-TRAIN_ANNOTATIONS_PATH = Json_root
+    Json_files = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress' \
+        +'/Data Collection/Pistachio/Multispectral/Json_files/'
 
-coco = COCO(TRAIN_ANNOTATIONS_PATH)
-img_ids = coco.getImgIds()
-annotation_ids = coco.getAnnIds(img_ids)
-annotations = coco.loadAnns(annotation_ids)
+    Img_files = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress' \
+    + '/Data Collection/Pistachio/Multispectral/'
 
-def index_capture(idx_file, idx_type):
-    print("{} is being extracted for all trees...".format(idx_file))
     index_all = list([])
+
+    for i in range(len(Dict)):
+        NDVI = index_capture(idx_file, idx_type, Img_files, Json_files, list(Dict.keys())[i])
+        index_all.append(NDVI)
+
+    return index_all
+
+def index_capture(idx_file, idx_type, Img_files, Json_files, Tx):
+
+    Json_path = Json_files + Tx + '.json'
+    image_path = Img_files + Dict[Tx] + '/index_map' + idx_file
+
+    coco = COCO(Json_path)
+    img_ids = coco.getImgIds()
+    annotation_ids = coco.getAnnIds(img_ids)
+    annotations = coco.loadAnns(annotation_ids) 
+    print("{} is being extracted for trees in {}...".format(idx_type, Tx))
+    
+    index_all_date = list([])
     for i in range(len(annotations)):
-        print(i)
         # image_id = coco.loadImgs(annotations[i]["id"])[0]   
         # im_id = image_id["id"]
-        im_id = i+1
+        im_id = annotations[i]["id"]
         entity_id = annotations[i]["category_id"]
         entity = coco.loadCats(entity_id)[0]["name"]
         print("idx={}: image {}: {}".format(i, im_id ,entity))
 
-        image_path = img_root + Dict[entity] + extn + idx_file  
+          
         # print(image_path)
         # image_meta = coco.loadImgs(annotations[i]["image_id"])[0]   
         # image_path = os.path.join(TRAIN_IMAGES_DIRECTORY, image_meta["file_name"])
@@ -57,14 +62,15 @@ def index_capture(idx_file, idx_type):
         index_array = I[(segmentation[0],segmentation[1])]
 
         temp_dict = {'idx': i, 'image_id': im_id, 'Test_Number': entity, 'pixel_array': index_array}
-        index_all.append([temp_dict])
+        index_all_date.append([temp_dict])
 
         # print(Index_a)
         # return Index_array
-    return index_all
+    return index_all_date
         
-NDVI = index_capture('/NDVI.tif', 'NDVI')
-
+#### Calling Functions        
+# NDVI = json_enumerator('/NDVI.tif', 'NDVI')
+GNDVI = json_enumerator('/GNDVI.tif', 'GNDVI')
 
 
 # I = io.imread(image_path)
@@ -73,6 +79,8 @@ NDVI = index_capture('/NDVI.tif', 'NDVI')
 # plt.show()
 
 #%%
+
+#### For Cropping the photos
 
 # from PIL import Image
 # import cv2
@@ -94,4 +102,8 @@ NDVI = index_capture('/NDVI.tif', 'NDVI')
 
 # # Create a cropped image from just the portion of the image we want
 # cropped = Image.fromarray(im[y_min:y_max, x_min:x_max, :])
+
+
+#%%
+
 
