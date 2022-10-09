@@ -24,8 +24,8 @@ def json_enumerator(idx_file, idx_type):
     index_all = list([])
 
     for i in range(len(Dict)):
-        NDVI = index_capture(idx_file, idx_type, Img_files, Json_files, list(Dict.keys())[i])
-        index_all.append(NDVI)
+        Index_all_date = index_capture(idx_file, idx_type, Img_files, Json_files, list(Dict.keys())[i])
+        index_all.append(Index_all_date)
 
     return index_all
 
@@ -61,7 +61,8 @@ def index_capture(idx_file, idx_type, Img_files, Json_files, Tx):
         I = io.imread(image_path)
         index_array = I[(segmentation[0],segmentation[1])]
 
-        temp_dict = {'idx': i, 'image_id': im_id, 'Test_Number': entity, 'pixel_array': index_array}
+        temp_dict = {'idx': i, 'image_id': im_id, 'Pixels_numbers': len(segmentation[0]) ,\
+            'spec_idx': idx_type,'Test_Number': entity, 'pixel_array': index_array}
         index_all_date.append([temp_dict])
 
         # print(Index_a)
@@ -69,14 +70,88 @@ def index_capture(idx_file, idx_type, Img_files, Json_files, Tx):
     return index_all_date
         
 #### Calling Functions        
-# NDVI = json_enumerator('/NDVI.tif', 'NDVI')
+NDVI = json_enumerator('/NDVI.tif', 'NDVI')
 GNDVI = json_enumerator('/GNDVI.tif', 'GNDVI')
+OSAVI = json_enumerator('/OSAVI.tif', 'OSAVI')
+LCI = json_enumerator('/LCI.tif', 'LCI')
+NDRE = json_enumerator('/NDRE.tif', 'NDRE')
 
+#%%
+#### SAVE data
+import pandas as pd
+idxes = NDVI, GNDVI, OSAVI, LCI, NDRE
 
-# I = io.imread(image_path)
-# plt.imshow(I)
-# coco.showAnns(annotations)
+tmp0 = []
+tmp1 = []
+tmp2 = []
+tmp3 = []
+for x in range(len(idxes)):
+    for i in range(len(idxes[x])):
+        for j in range(len(idxes[x][i])):
+            spec = idxes[x][i][j][0]['spec_idx']    # captures the type of spectral index
+            id = idxes[x][i][j][0]['image_id']      # captures the Image number
+            Tnum = idxes[x][i][j][0]['Test_Number'] # captures the Test Number
+            data = idxes[x][i][j][0]['pixel_array'] # captures the pixel arrays
+
+            tmp0.append(spec)
+            tmp1.append(id)
+            tmp2.append(Tnum)
+            tmp3.append(data)
+
+df = pd.DataFrame({'Spec_idx':tmp0, 'Image_id': tmp1, 'Test_number': tmp2, 'Pixel_array':tmp3})
+df.to_json('Result_Pistachio.json')
+
+# df[df['Image_id']==1]['Pixel_array'][0]  #example of accessing the data
+
+# np.save('NDVI_P.npy', NDVI)
+# np.save('GNDVI_P.npy', GNDVI)
+# np.save('OSAVI_P.npy', OSAVI)
+# np.save('LCI_P.npy', LCI)
+# np.save('NDRE_P.npy', NDRE)
+
+#%%
+
+####### calculating the mean and plotting the normalized density
+
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from scipy.stats import norm
+# import statistics
+  
+# # Plot between -10 and 10 with .001 steps.
+
+# def normal(i):
+#     t = np.array(NDRE[i][2][0]['pixel_array'])
+#     mean = statistics.mean(t)
+#     sd = statistics.stdev(t)
+#     return t, mean, sd
+
+# for i in range(7):
+#     t, mean, sd = normal(i)
+#     plt.scatter(t, norm.pdf(t, mean, sd))
+#     plt.legend
+
+# plt.legend(['1','2','3','4','5','6','7'])
 # plt.show()
+
+# %%
+
+# Per Test Day
+# from statistics import mean
+# L = list([])
+# for i in range(7):
+#     temp = list([])
+#     for j in range(18):
+#         x = (mean(GNDVI[i][j][0]['pixel_array']))
+#         print(x)
+#         temp.append(x)
+#         print(temp)
+#     L.append(temp)
+
+# Per Tree
+# from statistics import mean
+# for i in range(7):
+#    print(mean(LCI[i][0][0]['pixel_array']))
 
 #%%
 
