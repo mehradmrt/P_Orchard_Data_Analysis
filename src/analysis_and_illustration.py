@@ -1,24 +1,26 @@
 #%%
-from turtle import color
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import statistics
 
-df_im = pd.read_json('Result_Pistachio.json')
+df_im = pd.read_json('pistachio_im_indexes.json')
 
 swp_root = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress/' \
                 +'Data Collection/Pistachio/Ground Data'
 df_swp = pd.read_csv(swp_root+'/swp.csv')
+df_lt = pd.read_csv(swp_root+'/leaf_temp.csv')
+
+df_sap = pd.read_json('pistachio_sap_data.json')
+df_weather = pd.read_json('pistachio_weather_data.json')
 
 testnum = 7
 treenum = 18
 indexnum = 5
-testdic = ['T1', 'T2', 'T3', 'T4','T5','T6','T7']
+testdic = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
 
 # %%
-
 ##### Indexes ALL season
 def idx_plot(idx_type):
     for i in range(testnum):
@@ -44,7 +46,6 @@ lci = idx_plot('LCI')
 plt.figure()
 ndre = idx_plot('NDRE')
 
-
 ##### SWP average of all season
 def swp_extract():
     for i in range(testnum):
@@ -63,7 +64,7 @@ swp = swp_extract()
 
 
 #%%
-#### Results Per Tree 
+#### Results Per Tree
 def pertree(idx_type,i):
     mn = list([])
     avg_im = list([])
@@ -111,19 +112,9 @@ for i in range(treenum):
     # pertree('LCI')
     # pertree('NDRE')
 
+
 #%%
 # dataset = pd.read_csv('results5by5.csv',header=0,
 #                       skipinitialspace=True).values
 ### Machine Learning
-def xdata(idx_type):
-    data = df_im[df_im['spec_idx']==idx_type]['pixel_array']
-    newidx = data.index
-    result = list([])
-    for j in range(len(data)):
-        
-        val = statistics.median(data[newidx[j]])
-        result.append(val)
-    return result
 
-x = np.array(xdata('NDVI')).astype(float)
-y = df_swp['SWP'].to_numpy().astype(float)

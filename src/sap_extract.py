@@ -41,6 +41,7 @@ class file_handle:
         self.dir = root     # Root directory to the raw data
         self.num = sensor_num        # Number of sap sensors
         self.coef = Almond_coef
+
     def file_mixer_sap(self):
         files = glob.glob(self.dir + '\\Data_TREWid' + '*.csv')
         pack = pd.concat(map(pd.read_csv, files), ignore_index=True)
@@ -60,7 +61,7 @@ class file_handle:
             print(i+1)
 
             temp = newsap[newsap["Sensor ID"] == id]
-            print(newsap[newsap["Sensor ID"] == id])
+            # print(newsap[newsap["Sensor ID"] == id])
             
             V1 = (temp['Value 1'])
             dT = (V1 - 1000)/20
@@ -79,7 +80,7 @@ class file_handle:
             temp['Value 2'] = mois
 
             newsap[newsap["Sensor ID"] == id] = temp
-            print(newsap[newsap["Sensor ID"] == id])
+            # print(newsap[newsap["Sensor ID"] == id])
         # print(newsap)
         return newsap
 
@@ -99,9 +100,21 @@ class file_handle:
 
     #     return sap_data,weather_data
 
+    
+#%%
 Almond = file_handle(A_rtdr,A_sensor_num)
-sap_data = Almond.sap_correct()
-weather_data = Almond.file_mixer_weather()
+almond_sap_data = Almond.file_mixer_sap()
+almond_weather_data = Almond.file_mixer_weather()
+
+Pistachio = file_handle(P_rtdr,P_sensor_num)
+pistachio_sap_data = Pistachio.sap_correct()
+pistachio_weather_data = Pistachio.file_mixer_weather()
+
+# almond_sap_data.to_json('almond_sap_data.json')
+# almond_weather_data.to_json('almond_weather_data.json')
+# pistachio_sap_data.to_json('pistachio_sap_data.json')
+# pistachio_weather_data.to_json('pistachio_weather_data.json')
+
 
 #### Calling Class ####
 
@@ -121,7 +134,8 @@ weather_data = Almond.file_mixer_weather()
 #####################
 # ax = plt()
 
-newsap = sap_data[(sap_data["Sensor ID"] == 'TREW 6') & sap_data["Date and Time"] == '2022-08-27 00:00:00']
+newsap = sap_data\
+    [(sap_data["Sensor ID"] == 'TREW 6') & sap_data["Date and Time"] == '2022-08-27 00:00:00']
 # newsap = sap_data[(sap_data["Sensor ID"] == 'TREW 6') & (sap_data["Value 2"]<2500)]
 # newsap = newsap[1000:2000]
 # newwed = weather_data[1000:2000]

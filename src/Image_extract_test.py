@@ -33,12 +33,12 @@ import matplotlib.pyplot as plt
 from pycocotools.coco import COCO
 import skimage.io as io
 
-
+# Code
 Json_root = 'C:/Users/Students/Downloads/Test_Sensor_trees/images/instances_default.json'
 img_root = 'C:/Users/Students/Downloads/Test_Sensor_trees/images'
 img_root_idx = 'C:/Users/Students/Downloads/Test_Sensor_trees/images/NDVI_idx.tif'
 
-TRAIN_IMAGES_DIRECTORY = img_root
+TRAIN_IMAGES_DIRECTORY = img_root_idx
 TRAIN_ANNOTATIONS_PATH = Json_root
 
 coco = COCO(TRAIN_ANNOTATIONS_PATH)
@@ -51,8 +51,9 @@ for i in range(len(annotations)):
     entity = coco.loadCats(entity_id)[0]["name"]
     print("{}: {}".format(i, entity))
 
-image_meta = coco.loadImgs(annotations[i]["image_id"])[0]
-image_path = os.path.join(TRAIN_IMAGES_DIRECTORY, image_meta["file_name"])
+# image_meta = coco.loadImgs(annotations[i]["image_id"])[0]
+# image_path = os.path.join(TRAIN_IMAGES_DIRECTORY, image_meta["file_name"])
+image_path = img_root_idx
 
 I = io.imread(image_path)
 # plt.imshow(I)
@@ -68,7 +69,7 @@ masks = coco.annToMask(annotations[0])
 
 # Pick an item to mask
 item_mask = masks
-im = cv2.imread(image_path)
+im = cv2.imread(image_path,1)
 
 # Get the true bounding box of the mask (not the same as the bbox prediction)
 segmentation = np.where(item_mask == True)
@@ -79,8 +80,8 @@ y_max = int(np.max(segmentation[0]))
 print(x_min, x_max, y_min, y_max)
 
 # Create a cropped image from just the portion of the image we want
-cropped = Image.fromarray(im[y_min:y_max, x_min:x_max, :])
-cropped.save("test.tif")
+cropped = Image.fromarray(im[y_min:y_max, x_min:x_max])
+cropped.save("test0.tif")
 
 # Create a PIL image out of the mask
 mask = Image.fromarray((item_mask * 255).astype('uint8'))
