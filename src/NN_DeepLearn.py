@@ -1,12 +1,12 @@
 #%%
-import numpy as np
-import pandas as pd
-import matplotlib.pylab as plt
-import statistics
-from sklearn.neural_network import MLPRegressor
 
-## data 
-df_im = pd.read_json('pistachio_indexes.json')
+from sklearn.neural_network import MLPRegressor
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import statistics
+
+df_im = pd.read_json('pistachio_im_indexes.json')
 
 swp_root = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress/' \
                 +'Data Collection/Pistachio/Ground Data'
@@ -20,6 +20,8 @@ testnum = 7
 treenum = 18
 indexnum = 5
 testdic = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+idxdic = ['NDVI', 'GNDVI', 'OSAVI', 'LCI' ,'NDRE']
+DOY = [158, 172, 186, 194, 207, 214, 224]
 
 #%% Data preparation
 
