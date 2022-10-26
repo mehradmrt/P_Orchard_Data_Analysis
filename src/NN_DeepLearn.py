@@ -5,18 +5,21 @@ import matplotlib.pylab as plt
 import statistics
 from sklearn.neural_network import MLPRegressor
 
-
 ## data 
-df_im = pd.read_json('Result_Pistachio.json')
+df_im = pd.read_json('pistachio_indexes.json')
 
 swp_root = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress/' \
                 +'Data Collection/Pistachio/Ground Data'
 df_swp = pd.read_csv(swp_root+'/swp.csv')
+df_lt = pd.read_csv(swp_root+'/leaf_temp.csv')
+
+df_sap = pd.read_json('pistachio_sap_data.json')
+df_weather = pd.read_json('pistachio_weather_data.json')
 
 testnum = 7
 treenum = 18
 indexnum = 5
-testdic = ['T1', 'T2', 'T3', 'T4','T5','T6','T7']
+testdic = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
 #%% Data preparation
 
