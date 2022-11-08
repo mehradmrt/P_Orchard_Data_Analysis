@@ -91,6 +91,33 @@ def swp_extract():
 
 swp = swp_extract()
 
+#%%
+#### SWP average of all season per day with Mean and STD
+def swp_extract():
+    fig, ax = plt.subplots()
+
+    for i in range(testnum):
+        data = df_swp[df_swp['test_number']==testdic[i]]['SWP']
+        newidx = data.index
+        mean = np.mean(data)
+        std = np.std(data)
+        
+
+        ax.errorbar(DOY[i], mean, std, fmt='s', linewidth=2, ms=10 ,capsize=10, color = 'black')
+
+        for j in range(treenum):
+            ax.scatter(DOY[i],data[newidx[j]],color='blue')
+
+
+    plt.title('Pistachio Orchard', fontsize=16)
+    # plt.legend(['stressed','no stress','over watered'])
+    plt.xlabel('Day of Year', fontsize = 14)
+    plt.ylabel('SWP', fontsize = 14)
+    plt.show
+    plt.savefig('Pistachio.png')
+
+swp = swp_extract()
+
 
 #%%
 #### Results Per Tree SWP and Indexes
