@@ -65,7 +65,9 @@ def vis_nir():
             counter += 1
     
     return mdf
+
 master_visnir = vis_nir()
+master_visnir.reset_index(inplace=True)    
 
 #%% Raman Extract
 import pandas as pd
@@ -175,7 +177,7 @@ def Raman():
     return mdf
 
 master_ram = Raman()
-
+master_ram.reset_index(inplace=True)    
 
 # %%
 ###### Save results in .json
