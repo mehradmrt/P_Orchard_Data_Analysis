@@ -1,0 +1,58 @@
+#%%
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df_swp = pd.read_json('../results/pistachio_SWP.json')
+df_cwsi = pd.read_json('../results/pistachio_cwsi.json')
+df_im = pd.read_json('../results/pistachio_im_indexes.json')
+df_lt = pd.read_json('../results/pistachio_leaftemp.json')
+df_ram_c = pd.read_json('../results_cleaned/pistachio_raman_c.json')
+df_visnir_c = pd.read_json('../results_cleaned/pistachio_visnir_c.json')
+
+mdf = pd.DataFrame()
+
+tdays_all = ['T1','T2','T3','T4','T5','T6','T7']
+tdays_r = ['T5','T6','T7']
+treenum = 18
+
+#%%
+##### MDF All test days #####
+def image_edit(df,arg):
+    df = df[df['spec_idx']==arg]
+    df = df[['median']]
+    df.rename(columns={'median': arg + ' median'},inplace=True)
+    df.reset_index(inplace=True,drop=True)
+    return df
+
+ndvi = image_edit(df_im,'NDVI')
+gndvi= image_edit(df_im,'GNDVI')
+osavi = image_edit(df_im,'OSAVI')
+lci  = image_edit(df_im,'LCI')
+ndre  = image_edit(df_im,'NDRE')
+
+def swp_class(swp,qvals):
+    swp['SWPc'] = swp.loc[:, 'SWP']
+    qs = swp.quantile(qvals)
+    q1 = qs.iloc[0,0]
+    q2 = qs.iloc[1,0]
+    swp['SWPc'].mask((swp['SWP'] < q1) ,'WL-1',inplace=True )
+    swp['SWPc'].mask((swp['SWP'] >= q1) & (swp['SWP'] < q2),'WL-2' ,inplace=True)
+    swp['SWPc'].mask((swp['SWP'] >= q2),'WL-3',inplace=True )
+
+    # bins = (3,7,10,15)
+    # group_names = ['WL1','WL2','WL3']
+    # main['SWPc2'] = pd.cut(main['SWP'], bins=bins , labels=group_names)
+    # main['SWPc2'].isnull()
+    return swp
+
+# plt.scatter(mdf.index,mdf['SWP'])
+swp = swp_class(df_swp[['SWP']],[.33,.66])
+cwsi = df_cwsi[['tree_idx','test_number','leaf_temp','Ta','cwsi']]
+
+dfs = [cwsi,ndvi,gndvi,osavi,lci,ndre,swp]
+mdf = pd.concat(dfs, axis=1)
+mdf.to_json('../results_cleaned/mdf_all.json')
+
+# %%
+#### MDF all

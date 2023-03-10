@@ -210,5 +210,4 @@ master_ram.reset_index(inplace=True)
 master_visnir.to_json('../results/pistachio_visnir.json')
 # master_ram.to_json('../results/pistachio_raman.json')
 
-
 # %%

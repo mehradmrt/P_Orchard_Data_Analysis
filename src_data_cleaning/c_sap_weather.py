@@ -79,7 +79,6 @@ df_P_pd = P_pday(df_weather)
 df_sap_d = sap_pday(df_sap)
 sap_len(df_sap,df_sap_d)
 
-
 #%%
 ###### plot Sap and Temp
 def plt_sap_T(df_sap_d,df_T_pd):
@@ -126,3 +125,18 @@ def lowpointchk(dfmain):
     # print(dfmain.loc[df2.index])
 
 lowpointchk(df_sap)
+
+#%%
+##### Save to results cleaned
+def ToDT(df):
+    df['Date and Time'] = pd.to_datetime(df['Date and Time'])
+    return df.iloc[:,0:4]
+df_T_pd = ToDT(df_T_pd)
+df_P_pd = ToDT(df_P_pd)
+df_RH_pd = ToDT(df_RH_pd)
+df_weather = df_T_pd.merge(df_RH_pd,on='Date and Time').merge(df_P_pd,on='Date and Time')
+
+df_weather.to_json('../results_cleaned/pistachio_weather_c.json')
+ToDT(df_sap_d).to_json('../results_cleaned/pistachio_sap_c.json')
+
+# %%
