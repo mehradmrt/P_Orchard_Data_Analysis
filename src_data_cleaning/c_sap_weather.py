@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # df_im = pd.read_json('../results/pistachio_im_indexes.json')
 # df_swp = pd.read_json('../results/pistachio_SWP.json')
-# df_lt = pd.read_json('../results/pistachio_leaftemp.json')
+df_lt = pd.read_json('../results/pistachio_leaftemp.json')
 df_sap = pd.read_json('../results/pistachio_sap_data.json')
 df_weather = pd.read_json('../results/pistachio_weather_data.json')
 
@@ -72,7 +72,7 @@ def sap_len(df_,df_d):
             'Number of datapoints per date in TREW '+str(i+1):len(x2)})
     print('There was a total of 158 days from 03/30/22 to 09/04/22')
 
-df_weather = df_weather[df_weather['Station ID']== 'Weather 3']
+df_weather = df_weather[df_weather['Station ID']== 'Weather 4']
 df_T_pd = T_pday(df_weather)
 df_RH_pd = RH_pday(df_weather)
 df_P_pd = P_pday(df_weather)
@@ -128,15 +128,69 @@ lowpointchk(df_sap)
 
 #%%
 ##### Save to results cleaned
-def ToDT(df):
-    df['Date and Time'] = pd.to_datetime(df['Date and Time'])
-    return df.iloc[:,0:4]
-df_T_pd = ToDT(df_T_pd)
-df_P_pd = ToDT(df_P_pd)
-df_RH_pd = ToDT(df_RH_pd)
-df_weather = df_T_pd.merge(df_RH_pd,on='Date and Time').merge(df_P_pd,on='Date and Time')
+# def ToDT(df):
+#     df['Date and Time'] = pd.to_datetime(df['Date and Time'])
+#     return df.iloc[:,0:4]
+# df_T_pd = ToDT(df_T_pd)
+# df_P_pd = ToDT(df_P_pd)
+# df_RH_pd = ToDT(df_RH_pd)
+# df_weather = df_T_pd.merge(df_RH_pd,on='Date and Time').merge(df_P_pd,on='Date and Time')
 
-df_weather.to_json('../results_cleaned/pistachio_weather_c.json')
-ToDT(df_sap_d).to_json('../results_cleaned/pistachio_sap_c.json')
+# df_weather.to_json('../results_cleaned/pistachio_weather_c.json')
+# ToDT(df_sap_d).to_json('../results_cleaned/pistachio_sap_c.json')
 
 # %%
+
+##### Dates DF Creation #####
+def dfcreate(daynum):
+    df = pd.DataFrame([],columns=['Dates'])
+    for i in Dict:
+        temp = pd.date_range(end=Dict[i], periods=daynum)
+        temp = temp.to_frame(index=False, name='Dates')
+        df = pd.concat([df,temp],ignore_index=True)
+    return df
+
+df_dates = dfcreate(1)
+df_dates['Dates'] = df_dates['Dates'].dt.strftime('%Y-%m-%d')
+
+
+df_TRHP = df_lt[['tree_idx','test_number']]
+cols_to_insert = ['Tmin', 'Tmean','Tmax','Pmin', 'Pmean','Pmax','RHmin', 'RHmean','RHmax']
+for i, col in enumerate(cols_to_insert, start=2):
+    df_TRHP.insert(i, col, '')
+
+def val_pday(mydf,arg1,arg2):
+    for i in Dict:
+        # mydf['Date and Time'] = mydf['Date and Time'].dt.date
+        mydf['Date and Time'] = mydf['Date and Time'].map(str)
+        print(i)
+        print( mydf[mydf['Date and Time']==Dict[i]][arg2])
+
+        try:
+        # Check if the date exists in the DataFrame
+            if not mydf[mydf['Date and Time'] == Dict[i]].empty:
+            # Access the value based on the condition and arg2
+                value = mydf[mydf['Date and Time']==Dict[i]][arg2].values[0]
+                df_TRHP.loc[df_TRHP[df_TRHP['test_number']==i].index,arg1]= value
+            else:
+                print(f"No value found for {i}")
+        except IndexError:
+            print(f"No value found for {i}")
+
+
+val_pday(df_T_pd,'Tmin','Min T[℃]')
+val_pday(df_T_pd,'Tmean','Mean T[℃]')
+val_pday(df_T_pd,'Tmax','Max T[℃]')
+
+val_pday(df_P_pd,'Pmin','Min P[hPa]')
+val_pday(df_P_pd,'Pmean','Mean P[hPa]')
+val_pday(df_P_pd,'Pmax','Max P[hPa]')
+
+val_pday(df_RH_pd,'RHmin','Min RH%')
+val_pday(df_RH_pd,'RHmean','Mean RH%')
+val_pday(df_RH_pd,'RHmax','Max RH%')
+
+
+
+# %%
+df_TRHP.to_json('../results/pistachio_TRHP.json') 
