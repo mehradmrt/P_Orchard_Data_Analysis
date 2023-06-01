@@ -9,6 +9,7 @@ df_im = pd.read_json('../results/pistachio_im_indexes.json')
 df_lt = pd.read_json('../results/pistachio_leaftemp.json')
 df_ram_c = pd.read_json('../results_cleaned/pistachio_raman_c.json')
 df_visnir_c = pd.read_json('../results_cleaned/pistachio_visnir_c.json')
+df_TRHP = pd.read_json('../results/pistachio_TRHP.json')
 
 mdf = pd.DataFrame()
 
@@ -48,11 +49,57 @@ def swp_class(swp,qvals):
 
 # plt.scatter(mdf.index,mdf['SWP'])
 swp = swp_class(df_swp[['SWP']],[.33,.66])
-cwsi = df_cwsi[['tree_idx','test_number','leaf_temp','Ta','cwsi']]
+cwsi = df_cwsi[['cwsi']]
+weth = df_TRHP
 
-dfs = [cwsi,ndvi,gndvi,osavi,lci,ndre,swp]
+dfs = [weth,cwsi,ndvi,gndvi,osavi,lci,ndre,swp]
 mdf = pd.concat(dfs, axis=1)
 mdf.to_json('../results_cleaned/mdf_all.json')
 
 # %%
-#### MDF all
+#### MDF2
+#### MDF ram
+def ram_tpose(df):
+    mdf = pd.DataFrame()
+    for k in range(len(tdays_r)):
+        # print('\n\n\nTest Number ',tdays_r[k],'\n')
+        for i in range(treenum):
+            # print()
+            arr = (df[df['test_number']==tdays_r[k]][df['tree_id']==i+1])
+            arr = arr.loc[:,'Dark Subtracted #1']
+            arr = arr.reset_index(drop=True)
+            mdf[tdays_r[k]+' '+str(i+1)]= arr
+    
+    mdf = mdf.transpose()
+    mdf.columns = [str(col) + '_ram' for col in mdf.columns]
+    mdf.reset_index(drop=True,inplace=True)  
+
+    return mdf
+
+def visnir_tpose(df):
+    mdf = pd.DataFrame()
+    for k in range(len(tdays_r)):
+        # print('\n\n\nTest Number ',tdays_r[k],'\n')
+        for i in range(treenum):
+            # print()
+            arr=(df[df['test_number']==tdays_r[k]][df['tree_id']==i+1])
+            arr = arr.loc[:,'Reflect. %']
+            arr = arr.reset_index(drop=True)
+            mdf[tdays_r[k]+' '+str(i+1)]= arr
+
+    mdf = mdf.transpose()
+    mdf.columns = [str(col) + '_VNIR' for col in mdf.columns]
+    mdf.reset_index(drop=True,inplace=True)  
+
+    return mdf
+
+mdf_ram = ram_tpose(df_ram_c)
+mdf_nv = visnir_tpose(df_visnir_c)
+
+mdfn = (mdf.iloc[-54:,:]).reset_index(drop=True)
+mdfn2 = [mdf_ram,mdf_nv,mdfn]
+mdf2 = pd.concat(mdfn2, axis=1)
+
+mdf2.to_json('../results_cleaned/mdf2_all.json')
+
+# %%
