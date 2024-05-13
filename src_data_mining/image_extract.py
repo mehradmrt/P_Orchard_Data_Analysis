@@ -47,7 +47,6 @@ def index_capture(idx_file, idx_type, Img_files, Json_files, Tx):
         entity = coco.loadCats(entity_id)[0]["name"]
         print("idx={}: image {}: {}".format(i, im_id ,entity))
 
-
         # print(image_path)
         # image_meta = coco.loadImgs(annotations[i]["image_id"])[0]   
         # image_path = os.path.join(TRAIN_IMAGES_DIRECTORY, image_meta["file_name"])

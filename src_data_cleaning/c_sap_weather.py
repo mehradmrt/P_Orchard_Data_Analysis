@@ -139,8 +139,7 @@ lowpointchk(df_sap)
 # df_weather.to_json('../results_cleaned/pistachio_weather_c.json')
 # ToDT(df_sap_d).to_json('../results_cleaned/pistachio_sap_c.json')
 
-# %%
-
+#%%
 ##### Dates DF Creation #####
 def dfcreate(daynum):
     df = pd.DataFrame([],columns=['Dates'])
@@ -152,7 +151,6 @@ def dfcreate(daynum):
 
 df_dates = dfcreate(1)
 df_dates['Dates'] = df_dates['Dates'].dt.strftime('%Y-%m-%d')
-
 
 df_TRHP = df_lt[['tree_idx','test_number']]
 cols_to_insert = ['T_min', 'T_mean','T_max','P_min', 'P_mean','P_max','RH_min', 'RH_mean','RH_max']
@@ -193,6 +191,6 @@ val_pday(df_RH_pd,'RH_max','Max RH%')
 
 
 # %%
-df_TRHP.to_json('../results/pistachio_TRHP.json') 
+# df_TRHP.to_json('../results/pistachio_TRHP.json') 
 
 # %%

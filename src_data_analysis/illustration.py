@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import statistics
+from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
+from scipy.stats import pearsonr
 
 df_im = pd.read_json('../Results/pistachio_im_indexes.json')
 df_swp = pd.read_json('../Results/pistachio_SWP.json')
@@ -11,6 +14,7 @@ df_sap = pd.read_json('../Results/pistachio_sap_data.json')
 df_weather = pd.read_json('../Results/pistachio_weather_data.json')
 df_arable = pd.read_json('../Results/pistachio_arable.json')
 df_cwsi = pd.read_json('../results/pistachio_cwsi.json')
+df_trhp = pd.read_json('../results/pistachio_TRHP.json')
 
 testnum = 7
 treenum = 18
@@ -18,6 +22,185 @@ indexnum = 5
 testdic = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 idxdic = ['NDVI', 'GNDVI', 'OSAVI', 'LCI' ,'NDRE']
 DOY = [158, 172, 186, 194, 207, 214, 224]
+orchard = 'Pistachio'
+
+Dict = {'T1': '2022-06-07', 'T2': '2022-06-21', 'T3': '2022-07-05', 'T4': '2022-07-13', \
+            'T5': '2022-07-26', 'T6': '2022-08-02', 'T7': '2022-08-12'}
+
+#%%
+main = pd.read_json('../results_cleaned/mdf_all.json')
+main = main.dropna(how='any',axis=0) 
+main.info()
+mdf_plt = main[['NDRE','OSAVI','T_c','SWP']]
+
+#%%
+#### SWP vs Input ####
+
+def plot_multi_swp_vs_columns(dataframe, x_columns, y_column):
+    plt.figure(figsize=(8, 15), dpi=100)
+    axis_limits = {'T_c': (20, 50), 'NDRE': (0, 0.3), 'OSAVI': (0.1, 0.5), 'SWP': (0, 20)}
+    labels = {'T_c': '$T_c\ [^\circ C]$', 'NDRE': 'NDRE', 'OSAVI': 'OSAVI', 'SWP': '|$\psi$| $_{[bar]}$'}
+
+    for i, x_col in enumerate(x_columns):
+        ax = plt.subplot(3, 1, i + 1)
+        
+        x_data = dataframe[x_col].values
+        y_data = dataframe[y_column].values
+
+        model = LinearRegression().fit(x_data.reshape(-1, 1), y_data)
+        y_pred = model.predict(x_data.reshape(-1, 1))
+
+        r, _ = pearsonr(x_data, y_data)
+        r2 = model.score(x_data.reshape(-1, 1), y_data) 
+        rmse = np.sqrt(mean_squared_error(y_data, y_pred))
+
+        plt.scatter(x_data, y_data, color='black', marker='o', alpha=0.5)
+        plt.plot(x_data, y_pred, color='black', linewidth=3) 
+        
+        plt.xlabel(labels[x_col], fontsize=22)
+        plt.ylabel(labels[y_column], fontsize=22)
+
+        text_x = ax.get_xlim()[0] + .97 * (ax.get_xlim()[1] - ax.get_xlim()[0])
+        text_y = ax.get_ylim()[0] + 1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+        plt.text(text_x, text_y, f'$r={r:.2f}$\n$R^2={r2:.2f}$\n$RMSE={rmse:.2f}$', fontsize=16, verticalalignment='top', horizontalalignment='left')
+          
+        ax.set_xlim(axis_limits[x_col])
+        ax.set_ylim(axis_limits[y_column])
+        
+        plt.grid(True, linestyle='--', linewidth=0.2, color='gray')
+        plt.tick_params(axis='both', which='major', labelsize=18)
+
+    plt.tight_layout()
+    plt.savefig('../figures_v1/'+orchard+'_swp_inputs.png',dpi=300)
+    plt.show()
+
+x_columns = ['T_c', 'OSAVI', 'NDRE']  
+plot_multi_swp_vs_columns(mdf_plt, x_columns, 'SWP')
+
+
+#%%
+##### SWP vs DOY #########
+def swp_extract(df_swp, testnum, testdic, DOY, treenum):
+    fig, ax = plt.subplots(figsize=(10, 6), dpi=100)  
+
+    mean_marker = {'marker': 's', 'markersize': 13, 'markerfacecolor': 'black', 'markeredgecolor': 'black'}
+    individual_marker_style = {'marker': 'o', 'color': 'gray', 'alpha': 1, 's':100}
+
+    from matplotlib.lines import Line2D
+    legend_handles = [
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=10, label='SWP values'),
+        Line2D([0], [0], marker='s', color='w', markerfacecolor='black', markersize=10, label='Mean ± STD')
+    ]
+
+    for i in range(testnum):
+        data = df_swp[df_swp['test_number'] == testdic[i]]['SWP']
+        mean = np.mean(data)
+        std = np.std(data)
+        print(mean)
+        print(std,'\n')
+
+        for j in range(treenum):
+            if j < len(data):
+                ax.scatter(DOY[i], data.iloc[j], **individual_marker_style, label='SWP values' if i == 0 and j == 0 else "")
+
+        ax.errorbar(DOY[i], mean, yerr=std, fmt='s', capsize=10, elinewidth=4, color='black', **mean_marker, label='Mean ± STD' if i == 0 else "")
+
+    ax.grid(True, linestyle='--', linewidth=0.2, color='gray')
+    ax.set_xlabel('DOY', fontsize=22)
+    ax.set_ylabel('|$\psi$|', fontsize=22)
+    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.set_ylim(0, 20)
+    ax.legend(handles=legend_handles, fontsize=18)
+    plt.tight_layout()
+    plt.savefig('../figures_v1/'+orchard+'_swp_doy.png',dpi=600)
+    plt.show()
+
+swp_extract(df_swp, testnum, testdic, DOY, treenum)
+
+#%%
+#####  weather ######
+df= df_weather[df_weather['Station ID']== 'Weather 4']
+df['Date and Time'] = pd.to_datetime(df['Date and Time'])
+
+dict_dates = pd.to_datetime(list(Dict.values())).date
+df_filtered = df[(df['Date and Time'].dt.date.isin(dict_dates))]
+
+def plot_weather_parameters(df, DOY):
+    fig, axes = plt.subplots(3, 1, figsize=(12, 18), dpi=100)
+    
+    marker_style = {'marker': 'o', 'color': 'black', 'alpha': 0.5}
+    line_style = {'linewidth': 2, 'color': 'black'}
+
+    
+    date_offsets = pd.date_range(start='2022-01-01', periods=len(DOY), freq='D')
+    date_map = {date: offset for date, offset in zip(DOY, date_offsets)}
+    df['Plot Date'] = df['Date and Time'].apply(lambda x: date_map[x.date()] + (x - pd.Timestamp(x.date())))
+
+    transition_dates = date_offsets[1:]  
+
+    # Temperature plot
+    ax = axes[0]
+    ax.scatter(df['Plot Date'], df['Temperature [℃]'], **marker_style)
+    ax.plot(df['Plot Date'], df['Temperature [℃]'], **line_style)
+    # ax.set_title('Temperature Over Time')
+    # ax.set_xlabel('Time')
+    ax.set_ylabel('Temperature [℃]', fontsize=22)
+    ax.grid(True, linestyle='--', linewidth=0.2)
+    ax.set_ylim(0, 50)
+    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.set_xticklabels([])
+    for date in transition_dates:
+        ax.axvline(x=date, color='black', linestyle='--', linewidth=1) 
+
+    # Humidity plot
+    ax = axes[1]
+    ax.scatter(df['Plot Date'], df['Humidity [RH%]'], **marker_style)
+    ax.plot(df['Plot Date'], df['Humidity [RH%]'], **line_style)
+    # ax.set_title('Humidity Over Time')
+    # ax.set_xlabel('Time')
+    ax.set_ylabel('Relative Humidity [%]',fontsize=22)
+    ax.grid(True, linestyle='--', linewidth=0.2)
+    ax.set_ylim(0, 100)
+    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.set_xticklabels([])
+    for date in transition_dates:
+        ax.axvline(x=date, color='black', linestyle='--', linewidth=1)  
+
+    # Pressure plot
+    ax = axes[2]
+    ax.scatter(df['Plot Date'], df['Pressure [hPa]'], **marker_style)
+    ax.plot(df['Plot Date'], df['Pressure [hPa]'], **line_style)
+    ax.set_xlabel('24 hour Cycle ',fontsize=22)
+    ax.set_ylabel('Pressure [hPa]',fontsize=22)
+    ax.grid(True, linestyle='--', linewidth=0.2)
+    ax.set_ylim(1000, 1015)
+    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.set_xticklabels([])
+    for date in transition_dates:
+        ax.axvline(x=date, color='black', linestyle='--', linewidth=1)  
+
+
+    for i, date in enumerate(date_offsets):
+        if i < len(DOY):
+            for ax in axes:
+                ax.text(date + pd.Timedelta(hours=12),  
+                        ax.get_ylim()[0] + (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.0, 
+                        f' {DOY[i]}',  
+                        horizontalalignment='center',
+                        verticalalignment='bottom',
+                        rotation = 20,
+                        fontsize=17,
+                        color='black')    
+                
+
+
+    plt.tight_layout()
+    plt.savefig('../figures_v1/'+orchard+'_weather.png',dpi=600)
+    plt.show()
+
+plot_weather_parameters(df_filtered, dict_dates)
+
+
 
 # %%
 ##### Indexes ALL season
@@ -108,10 +291,9 @@ def swp_extract():
     plt.xlabel('Day of Year', fontsize = 14)
     plt.ylabel('SWP', fontsize = 14)
     plt.show
-    plt.savefig('Pistachio.png')
+    # plt.savefig('Pistachio.png')
 
 swp = swp_extract()
-
 
 #%%
 #### Results Per Tree SWP and Indexes
