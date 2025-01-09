@@ -8,7 +8,7 @@ tdays = ['T5','T6','T7']
 samdict = ['S1','S2','S3']
 nirdict = {'T5': '07_26_22', 'T6': '08_02_22', 'T7': '08_12_22'}
 Exceptions = {'T5':['00','02'],'T6':['43'],'T7':[]}
-vnir_dir = 'C:/Users/Students/Box/IoT-4Ag -Data/VIS_NIR/Pistachio_'
+vnir_dir = '../IoT-4Ag -Data/VIS_NIR/Pistachio_'     # TODO update the directories
 treenum = 18
 
 def file_rename():

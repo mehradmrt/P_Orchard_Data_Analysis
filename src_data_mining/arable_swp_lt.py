@@ -6,8 +6,8 @@ import statistics
 
 # df_im = pd.read_json('../results/pistachio_im_indexes.json')
 
-swp_root = 'C:/Users/Students/Box/Research/IoT4ag/Project_ Water Stress/' \
-                +'Data Collection/Pistachio/Ground Data'
+
+swp_root = '../Data Collection/Pistachio/Ground Data' # TODO update the directories
 df_swp = pd.read_csv(swp_root+'/swp.csv')
 df_lt = pd.read_csv(swp_root+'/leaf_temp.csv')
 # df_lt.to_json('pistachio_leaftemp.json')
@@ -15,8 +15,7 @@ df_lt = pd.read_csv(swp_root+'/leaf_temp.csv')
 df_sap = pd.read_json('pistachio_sap_data.json')
 df_weather = pd.read_json('pistachio_weather_data.json')
 
-arable_root = 'C:/Users/Students/Box/Research/IoT4ag'\
-    +'/Project_ Water Stress/Data Collection/Pistachio/Arable_P'
+arable_root = '../Data Collection/Pistachio/Arable_P' # TODO update the directories
 df_arable_T10 = pd.read_csv(arable_root+
 '/arable___012444___ 2022_06_21 19_18_53__012444_daily_20220930.csv', skiprows=10)
 df_arable_T13 = pd.read_csv(arable_root+

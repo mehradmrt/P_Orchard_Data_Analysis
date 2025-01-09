@@ -1,14 +1,7 @@
-# Ignore Results directory
 Results/
-
-# Ignore results_cleaned directory
 results_cleaned/
-
-# Ignore MATLAB directory
 MATLAB/
-
-# Ignore figures_v1 directory
 figures_v1/
-
+.vscode/
 
 ### Results shared upon request ###
