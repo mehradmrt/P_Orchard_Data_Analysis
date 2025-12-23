@@ -17,7 +17,7 @@ pip install numpy pandas scikit-learn matplotlib seaborn scipy
 
 The manuscript is currently under review. The preprint is available through:
 
-`Mortazavi, M., Ehsani, R., Carpin, S., & Toudeshki, A. (2023). Predicting Tree Water Status in Pistachio and Almond Orchards Using Supervised Machine Learning. Available at SSRN 4511076.`
+`Mortazavi, M., Carpin, S., Toudeshki, A., & Ehsani, R. (2025). A practical data-driven approach for precise stem water potential monitoring in pistachio and almond orchards using supervised machine learning algorithms. Computers and Electronics in Agriculture, 231, 110004.`
 
 
 ## License
