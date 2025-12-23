@@ -15,8 +15,6 @@ pip install numpy pandas scikit-learn matplotlib seaborn scipy
 
 ## Cite this work
 
-The manuscript is currently under review. The preprint is available through:
-
 `Mortazavi, M., Carpin, S., Toudeshki, A., & Ehsani, R. (2025). A practical data-driven approach for precise stem water potential monitoring in pistachio and almond orchards using supervised machine learning algorithms. Computers and Electronics in Agriculture, 231, 110004.`
 
 
